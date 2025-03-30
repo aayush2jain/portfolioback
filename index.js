@@ -180,135 +180,123 @@ app.put('/user/updateintro/:id', (req, res) =>{
   });
 })
 // API Route to Fetch User Details
-app.get("/user/:id", (req, res) => {//iski query theek kerni hai
-    const userId = req.params.id;
-  
-    const query = `
-      SELECT 
-          u.id,
-          u.name,
-          u.email,
-          u.contact,
-          u.github,
-          u.linkedin,
-          u.twitter,
-          u.instagram,
-          u.patreon,
-          u.pinterest,
-          u.userImage,
-          u.resume,
-          GROUP_CONCAT(DISTINCT r.role ORDER BY r.role SEPARATOR ', ') AS roles,
-          ANY_VALUE(ui.tech_stacks) AS tech_stacks,
-          ANY_VALUE(ui.profession) AS profession, 
-          ANY_VALUE(ui.coding_languages) AS coding_languages, 
-          ANY_VALUE(ui.about) AS about 
-      FROM users u
-      LEFT JOIN user_roles r ON u.id = r.user_id
-      LEFT JOIN user_introduction ui ON u.id = ui.user_id
-      WHERE u.id = ?
-      GROUP BY u.id;
-    `;
-  
-    db.query(query, [userId], (err, results) => {
-      if (err) {
-        console.error("Error fetching user:", err);``
-        return res.status(500).json({ error: "Database query failed" });
+app.get("/user/:id", async (req, res) => {
+  const userId = req.params.id;
+
+  const query = `
+    SELECT users.*, user_introduction.*
+    FROM users
+    LEFT JOIN user_introduction ON users.id = user_introduction.user_id
+    WHERE users.id = $1;
+  `;
+
+  try {
+      const result = await db.query(query, [userId]);
+
+      if (result.rows.length === 0) {
+          return res.status(404).json({ message: "User not found" });
       }
-  
-      if (results.length === 0) {
-        return res.status(404).json({ message: "User not found" });
+
+      res.json(result.rows[0]); // Return the user data
+  } catch (err) {
+      console.error("Error fetching user:", err);
+      return res.status(500).json({ error: "Database query failed" });
+  }
+});
+
+app.get("/about/:id", async (req, res) => {
+  const userId = req.params.id;
+
+  const query = `
+    SELECT i.*, u.name 
+    FROM aboutuser AS i
+    JOIN users AS u ON u.id = i.user_id
+    WHERE u.id = $1;
+  `;
+
+  try {
+      const result = await db.query(query, [userId]);
+
+      if (result.rows.length === 0) {
+          return res.status(404).json({ message: "User not found" });
       }
-  
-      res.json(results[0]); // Return a single user object
-    });
-  });
-  app.get("/about/:id", (req, res) => {
-    const userId = req.params.id;
-  
-    const query = `
-     select i.*,u.name from aboutuser as i
-join users as u
-on u.id = i.user_id
-where u.id = ?;
-    `;
-  
-    db.query(query, [userId], (err, results) => {
-      if (err) {
-        console.error("Error fetching user:", err);
-        return res.status(500).json({ error: "Database query failed" });
+      console.log("result",result.rows[0]);
+      res.json(result.rows[0]); // Return a single user object
+  } catch (err) {
+      console.error("Error fetching user:", err);
+      return res.status(500).json({ error: "Database query failed" });
+  }
+});
+
+app.get("/hobby/:id", async (req, res) => {
+  const userId = req.params.id;
+
+  const query = `
+      SELECT hobby 
+      FROM user_hobbies
+      WHERE user_id = $1;
+  `;
+
+  try {
+      const result = await db.query(query, [userId]);
+
+      if (result.rows.length === 0) {
+          return res.status(404).json({ message: "User not found" });
       }
+      console.log("result",result.rows[0]);
+      res.json(result.rows); // Return an array of hobbies
+  } catch (err) {
+      console.error("Error fetching user hobbies:", err);
+      return res.status(500).json({ error: "Database query failed" });
+  }
+});
+
   
-      if (results.length === 0) {
-        return res.status(404).json({ message: "User not found" });
+app.get("/roles/:id", async (req, res) => {
+  const userId = req.params.id;
+
+  const query = `
+      SELECT role 
+      FROM user_roles
+      WHERE user_id = $1;
+  `;
+
+  try {
+      const result = await db.query(query, [userId]);
+
+      if (result.rows.length === 0) {
+          return res.status(404).json({ message: "User not found" });
       }
-  
-      res.json(results); // Return a single user object
-    });
-  });
-  app.get("/hobby/:id", (req, res) => {
-    const userId = req.params.id;
-  
-    const query = `
-     select hobby from user_hobbies
-where user_id = ?;
-    `;
-  
-    db.query(query, [userId], (err, results) => {
-      if (err) {
-        console.error("Error fetching user:", err);
-        return res.status(500).json({ error: "Database query failed" });
+
+      res.json(result.rows); // Return an array of roles
+  } catch (err) {
+      console.error("Error fetching user roles:", err);
+      return res.status(500).json({ error: "Database query failed" });
+  }
+});
+
+app.get("/project/:id", async (req, res) => {
+  const userId = req.params.id;
+
+  const query = `
+      SELECT * FROM projects
+      WHERE userId = $1;
+  `;
+
+  try {
+      const result = await db.query(query, [userId]);
+
+      if (result.rows.length === 0) {
+          return res.status(404).json({ message: "User not found" });
       }
-  
-      if (results.length === 0) {
-        return res.status(404).json({ message: "User not found" });
-      }
-  
-      res.json(results); // Return a single user object
-    });
-  });
-  
-  app.get("/roles/:id", (req, res) => {
-    const userId = req.params.id;
-  
-    const query = `
-     SELECT role FROM user_roles
-where user_id = ?;
-    `;
-  
-    db.query(query, [userId], (err, results) => {
-      if (err) {
-        console.error("Error fetching user:", err);
-        return res.status(500).json({ error: "Database query failed" });
-      }
-  
-      if (results.length === 0) {
-        return res.status(404).json({ message: "User not found" });
-      }
-  
-      res.json(results); // Return a single user object
-    });
-  });
-  app.get("/project/:id", (req, res) => {
-    const userId = req.params.id; 
-  
-    const query = `
-     select * from projects
-where userId = ?;
-    `;
-  
-    db.query(query, [userId], (err, results) => {
-      if (err) {
-        console.error("Error fetching user:", err);
-        return res.status(500).json({ error: "Database query failed" });
-      }
-  
-      if (results.length === 0) {
-        return res.status(404).json({ message: "User not found" });
-      }
-  
-      res.json(results); // Return a single user object
-    });
-  });
+
+      res.json(result.rows); // Return project details
+  } catch (err) {
+      console.error("Error fetching project:", err);
+      return res.status(500).json({ error: "Database query failed" });
+  }
+});
+
 app.get('/',(req,res)=>{
     res.send("Hello World");
 })
