@@ -59,9 +59,9 @@ app.post('/user/submit', async (req, res) => {
     const userId = result.rows[0].id; // Get the generated user_id from PostgreSQL
     // Insert into user_introduction table
     const introSql = `
-      INSERT INTO user_introduction (user_id, profession, about, tech_stacks, coding_languages) 
-      VALUES ($1, $2, $3, $4, $5)`;
-    const introValues = [userId, profession, about, tech_stack,skills];
+      INSERT INTO user_introduction (user_id, profession, tech_stacks, coding_languages) 
+      VALUES ($1, $2, $3, $4)`;
+    const introValues = [userId, profession, tech_stack,skills];
 
     db.query(introSql, introValues, (err, result) => {
       if (err) {
@@ -111,74 +111,103 @@ app.post('/user/submit', async (req, res) => {
     });
   });
 });
-app.put('/user/updateinfo/:id', (req, res) => {
+app.put('/user/updateinfo/:id', async (req, res) => {
   const userId = req.params.id;
-  console.log("userId",userId);
-  console.log("data",req.body);
-  const {intro,quote}  = req.body.formData;
-  console.log("inro",req.body.hobbies);
-  const {hobbies} = req.body;
-  const infoSql ='UPDATE aboutuser SET intro = ?, quote = ? WHERE user_id = ?';
-  const deleteHobbySql = 'DELETE FROM user_hobbies WHERE user_id = ?';
-  const insertHobbySql = 'INSERT INTO user_hobbies (user_id, hobby) VALUES (?, ?)';
-  db.query(deleteHobbySql, [userId], (err, result) => {
-     if(err) {
-      console.error("Error deleting hobbies:", err);
-      return res.status(500).json({ success: false, message: "Database error" });
-    }
-    console.log("Deleted hobbies successfully");
-  })
-  hobbies.forEach((hobby) => {
-     db.query(insertHobbySql, [userId, hobby], (err, result) => {
-      if(err) {
-        console.error("Error inserting hobbies:", err);
-        return res.status(500).json({ success: false, message: "Database error" });
+  console.log("userId", userId);
+  console.log("data", req.body);
+
+  const { intro, quote } = req.body.formData;
+  const { hobbies } = req.body;
+
+  const updateInfoSql = 'UPDATE aboutuser SET intro = $1, quote = $2 WHERE user_id = $3';
+  const deleteHobbySql = 'DELETE FROM user_hobbies WHERE user_id = $1';
+  const insertHobbySql = 'INSERT INTO user_hobbies (user_id, hobby) VALUES ($1, $2)';
+
+  try {
+      // Start transaction
+      await db.query('BEGIN');
+
+      // Delete existing hobbies
+      await db.query(deleteHobbySql, [userId]);
+      console.log("Deleted hobbies successfully");
+
+      // Insert new hobbies
+      for (const hobby of hobbies) {
+          await db.query(insertHobbySql, [userId, hobby]);
       }
       console.log("Inserted hobbies successfully");
-     }
-  )
-  });
-  const infoValues = [intro,quote,userId];
-  db.query(infoSql,infoValues,(err,result)=>{
-    if(err){
+
+      // Update user information
+      await db.query(updateInfoSql, [intro, quote, userId]);
+
+      // Commit transaction
+      await db.query('COMMIT');
+
+      res.json({ success: true, message: "User data updated successfully!" });
+  } catch (err) {
+      // Rollback transaction in case of error
+      await db.query('ROLLBACK');
       console.error("Error updating user:", err);
       return res.status(500).json({ success: false, message: "Database error" });
-    }
-    res.json({ success: true, message: "User data updated successfully!" });
-  });
+  }
 });
-app.put('/changeproject/:id', (req, res) => {
+
+app.put('/changeproject/:id', async (req, res) => {
   const projectId = req.params.id;
-  console.log("userId",projectId);
-  console.log("data",req.body);
-  const project = req.body;
-  const projectSql = `update projects
-set projectName = ?,description = ?
-where id = ?;`;
-  const VALUES = [project.projectName,project.description,projectId];
-  db.query(projectSql,VALUES,(err,result)=>{
-    if(err){
+  console.log("Project ID:", projectId);
+  console.log("Data:", req.body);
+
+  const { projectname, description } = req.body;
+
+  const projectSql = `
+      UPDATE projects
+      SET projectName = $1, description = $2
+      WHERE id = $3
+      RETURNING *;
+  `;
+
+  try {
+      const { rows } = await db.query(projectSql, [projectname, description, projectId]);
+
+      if (rows.length === 0) {
+          return res.status(404).json({ success: false, message: "Project not found" });
+      }
+
+      res.json({ success: true, message: "Project updated successfully!", updatedProject: rows[0] });
+  } catch (err) {
       console.error("Error updating project:", err);
       return res.status(500).json({ success: false, message: "Database error" });
-    }
-    res.json({ success: true, message: "User data updated successfully!" });
-  })
-})
-app.put('/user/updateintro/:id', (req, res) =>{
+  }
+});
+
+app.put('/user/updateintro/:id', async (req, res) => {
   const userId = req.params.id;
-  console.log("userId",userId);
-  console.log("data",req.body);
-  const {profession,about,techStack,skills} = req.body;
-  const introSql ='UPDATE user_introduction SET profession = ?, about = ?, tech_stacks = ?, coding_languages = ? WHERE user_id = ?';
-  const introValues = [profession,about,techStack,skills,userId];
-  db.query(introSql,introValues,(err,result)=>{
-    if(err){
+  console.log("User ID:", userId);
+  console.log("Data:", req.body);
+
+  const { profession, about, techStack, skills } = req.body;
+
+  const introSql = `
+      UPDATE user_introduction
+      SET profession = $1, about = $2, tech_stacks = $3, coding_languages = $4
+      WHERE user_id = $5
+      RETURNING *;
+  `;
+
+  try {
+      const { rows } = await db.query(introSql, [profession, about, techStack, skills, userId]);
+
+      if (rows.length === 0) {
+          return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      res.json({ success: true, message: "User data updated successfully!", updatedUser: rows[0] });
+  } catch (err) {
       console.error("Error updating user:", err);
       return res.status(500).json({ success: false, message: "Database error" });
-    }
-    res.json({ success: true, message: "User data updated successfully!" });
-  });
-})
+  }
+});
+
 // API Route to Fetch User Details
 app.get("/user/:id", async (req, res) => {
   const userId = req.params.id;
