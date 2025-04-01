@@ -117,25 +117,25 @@ app.post('/user/submit', async (req, res) => {
           return res.status(500).json({ success: false, message: "Database error" });
         }
         
-        // res.json({ success: true, message: "User data inserted successfully!",data:{userId} });
+        res.json({ success: true, message: "User data inserted successfully!",data:{userId} });
       });
     });
   });
-    // Send order confirmation email
-    const mailOptions = {
-      from: 'aayushjain1290@gmail.com', // Sender email
-      to: email,                     // Recipient email
-      subject: 'Welcome to My Portfolio', 
-       html: `
-        <p>Dear ${name},</p>
-        <p>Welcome to the club
-</p>
-      `, // Email body content
-    };
+//     // Send order confirmation email
+//     const mailOptions = {
+//       from: 'aayushjain1290@gmail.com', // Sender email
+//       to: email,                     // Recipient email
+//       subject: 'Welcome to My Portfolio', 
+//        html: `
+//         <p>Dear ${name},</p>
+//         <p>Welcome to the club
+// </p>
+//       `, // Email body content
+//     };
 
-    // Send the email
-    await transporter.sendMail(mailOptions);
-    res.json({ success: true, message: "User data inserted successfully!",data:{userId} });
+//     // Send the email
+//     await transporter.sendMail(mailOptions);
+//     res.json({ success: true, message: "User data inserted successfully!",data:{userId} });
   } );
 app.put('/user/updateinfo/:id', async (req, res) => {
   const userId = req.params.id;
