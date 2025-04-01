@@ -1,6 +1,7 @@
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
+const nodemailer = require("nodemailer");
 const app = express();
 const PORT =  4000;
 const bodyParser = require('body-parser');
@@ -12,6 +13,16 @@ app.use(cors()); // Enable CORS for frontend access
 const db = new Pool({
   connectionString:'postgresql://postgres:jmbfLnrZzaHrrMIknbtzTJbjWatRqPKk@gondola.proxy.rlwy.net:21402/railway',
   ssl: { rejectUnauthorized: false },  // Required for Railway PostgreSQL
+});
+// Create a Nodemailer transporter
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587, // Use 587 instead of 465
+  secure: false, // `true` for port 465, `false` for 587
+  auth: {
+    user: 'aayushjain1290@gmail.com',
+    pass: 'jpdzvxmwrnfcymfx',
+  },
 });
 // // MySQL Database Connection
 // const db = mysql.createConnection({
@@ -49,7 +60,7 @@ app.post('/user/submit', async (req, res) => {
 
   const userValues = [name, email, phone, linkedin, github, twitter, instagram, pinterest, resume];
 
-  await db.query(userSql, userValues, (err, result) => {
+   db.query(userSql, userValues, (err, result) => {
     if (err) {
       console.error("Error inserting user:", err);
       return res.status(500).json({ success: false, message: "Database error" });
@@ -105,12 +116,27 @@ app.post('/user/submit', async (req, res) => {
           console.error("Error inserting about user:", err);
           return res.status(500).json({ success: false, message: "Database error" });
         }
-
-        res.json({ success: true, message: "User data inserted successfully!",data:{userId} });
+        
+        // res.json({ success: true, message: "User data inserted successfully!",data:{userId} });
       });
     });
   });
-});
+    // Send order confirmation email
+    const mailOptions = {
+      from: 'aayushjain1290@gmail.com', // Sender email
+      to: email,                     // Recipient email
+      subject: 'Welcome to My Portfolio', 
+       html: `
+        <p>Dear ${name},</p>
+        <p>Welcome to the club
+</p>
+      `, // Email body content
+    };
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true, message: "User data inserted successfully!",data:{userId} });
+  } );
 app.put('/user/updateinfo/:id', async (req, res) => {
   const userId = req.params.id;
   console.log("userId", userId);
