@@ -287,18 +287,18 @@ app.get("/user/:id", async (req, res) => {
 
 app.post("/visit", async (req, res) => {
   const { id } = req.body;
-
+  
   if (!id) {
     return res.status(400).json({ error: "userId is required" });
   }
 
   const visitorQuery = `
-    INSERT INTO visitors (userId, visit_date, visit_time)
+    INSERT INTO visitors (userid, visit_date, visit_time)
     VALUES ($1, CURRENT_DATE, CURRENT_TIME);
   `;
 
   try {
-    await db.query(visitorQuery, [userId]);
+    await db.query(visitorQuery, [id]);
     res.status(200).json({ message: "Visit logged successfully" });
   } catch (err) {
     console.error("Error logging visitor:", err);
@@ -318,10 +318,6 @@ app.get("/about/:id", async (req, res) => {
 
   try {
       const result = await db.query(query, [userId]);
-
-      if (result.rows.length === 0) {
-          return res.status(404).json({ message: "User not found" });
-      }
       console.log("result",result.rows[0]);
       res.json(result.rows[0]); // Return a single user object
   } catch (err) {
@@ -341,10 +337,6 @@ app.get("/hobby/:id", async (req, res) => {
 
   try {
       const result = await db.query(query, [userId]);
-
-      if (result.rows.length === 0) {
-          return res.status(404).json({ message: "User not found" });
-      }
       console.log("result",result.rows[0]);
       res.json(result.rows); // Return an array of hobbies
   } catch (err) {
