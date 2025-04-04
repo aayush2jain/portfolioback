@@ -260,6 +260,7 @@ app.put('/user/updateintro/:id', async (req, res) => {
 app.get("/user/:id", async (req, res) => {
   const userId = req.params.id;
   const visitorQuery =  `insert into visitors values($1)`;
+  const visitorResult = await db.query(visitorQuery,[userId]);
   const query = `
     SELECT users.*, user_introduction.*
     FROM users
@@ -273,12 +274,35 @@ app.get("/user/:id", async (req, res) => {
       if (result.rows.length === 0) {
           return res.status(404).json({ message: "User not found" });
       }
-      const visitorResult = await db.query(visitorQuery,[userId]);
       
       res.json(result.rows[0]); // Return the user data
   } catch (err) {
       console.error("Error fetching user:", err);
       return res.status(500).json({ error: "Database query failed" });
+  }
+});
+
+
+// routes/logVisit.js or directly in your main file
+
+app.post("/visit", async (req, res) => {
+  const { id } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ error: "userId is required" });
+  }
+
+  const visitorQuery = `
+    INSERT INTO visitors (userId, visit_date, visit_time)
+    VALUES ($1, CURRENT_DATE, CURRENT_TIME);
+  `;
+
+  try {
+    await db.query(visitorQuery, [userId]);
+    res.status(200).json({ message: "Visit logged successfully" });
+  } catch (err) {
+    console.error("Error logging visitor:", err);
+    res.status(500).json({ error: "Failed to log visit" });
   }
 });
 
