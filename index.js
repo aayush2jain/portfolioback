@@ -259,8 +259,8 @@ app.put('/user/updateintro/:id', async (req, res) => {
 // API Route to Fetch User Details
 app.get("/user/:id", async (req, res) => {
   const userId = req.params.id;
-  const visitorQuery =  `insert into visitors values($1)`;
-  const visitorResult = await db.query(visitorQuery,[userId]);
+  // const visitorQuery =  `insert into visitors values($1)`;
+  // const visitorResult = await db.query(visitorQuery,[userId]);
   const query = `
     SELECT users.*, user_introduction.*
     FROM users
