@@ -46,19 +46,32 @@ db.query("SELECT NOW()", (err, res) => {
       console.log("✅ Connected to PostgreSQL at:", res.rows[0].now);
   }
 });
+
+app.get('/getuser',async (req, res) =>{
+  console.log("getuser called",req.query.email);
+  const email = req.query.email;
+  const query = `select * from users where email =$1`
+  try{
+      const {rows} = await db.query(query,[email])
+      res.json({ success: true, message: "Project updated successfully!", userDetails: rows });
+  }
+  catch(error){
+    console.error("error",error);
+  }
+})
 app.post('/user/submit', async (req, res) => {
   const { name, email, phone, linkedin, github, twitter, instagram, pinterest, resume } = req.body;
   const { profession, about, tech_stack,skills, hobbies,roles } = req.body;
-
+  const { skillSet,profileImage} = req.body;
   const { user_quote } = req.body;
   const {projects} = req.body;
   console.log("data",req.body);
   // Insert into users table
   const userSql = `
-  INSERT INTO users (name, email, contact, linkedin, github, twitter, instagram, pinterest, resume)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`;
+  INSERT INTO users (name, email, contact, linkedin, github, twitter, instagram, pinterest, resume,userimage)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10) RETURNING id`;
 
-  const userValues = [name, email, phone, linkedin, github, twitter, instagram, pinterest, resume];
+  const userValues = [name, email, phone, linkedin, github, twitter, instagram, pinterest, resume,profileImage];
 
    db.query(userSql, userValues, (err, result) => {
     if (err) {
@@ -89,6 +102,15 @@ app.post('/user/submit', async (req, res) => {
           }
         });
       });
+      const skillSql = `insert into skillset (userid,skill)
+values ($1,$2);`;
+       skillSet.forEach((skill) => {
+        db.query(skillSql,[userId,skill],(err,result)=>{
+          if(err){
+            console.error("Error inserting skill:", err);
+          }
+        });
+       });
       const roleSql = `INSERT INTO user_roles (user_id, role) VALUES ($1, $2)`;
       roles.forEach((role) => {
         db.query(roleSql, [userId, role], (err, result) => {
@@ -237,7 +259,7 @@ app.put('/user/updateintro/:id', async (req, res) => {
 // API Route to Fetch User Details
 app.get("/user/:id", async (req, res) => {
   const userId = req.params.id;
-
+  const visitorQuery =  `insert into visitors values($1)`;
   const query = `
     SELECT users.*, user_introduction.*
     FROM users
@@ -251,7 +273,8 @@ app.get("/user/:id", async (req, res) => {
       if (result.rows.length === 0) {
           return res.status(404).json({ message: "User not found" });
       }
-
+      const visitorResult = await db.query(visitorQuery,[userId]);
+      
       res.json(result.rows[0]); // Return the user data
   } catch (err) {
       console.error("Error fetching user:", err);
@@ -319,9 +342,7 @@ app.get("/roles/:id", async (req, res) => {
   try {
       const result = await db.query(query, [userId]);
 
-      if (result.rows.length === 0) {
-          return res.status(404).json({ message: "User not found" });
-      }
+     
 
       res.json(result.rows); // Return an array of roles
   } catch (err) {
@@ -341,16 +362,25 @@ app.get("/project/:id", async (req, res) => {
   try {
       const result = await db.query(query, [userId]);
 
-      if (result.rows.length === 0) {
-          return res.status(404).json({ message: "User not found" });
-      }
-
       res.json(result.rows); // Return project details
   } catch (err) {
       console.error("Error fetching project:", err);
       return res.status(500).json({ error: "Database query failed" });
   }
 });
+app.get("/skillset/:id", async (req, res) => {
+   const userId = req.params.id;
+   const query ='select * from skillSet where userid = $1';
+   try{
+       const result = await db.query(query,[userId]);
+       
+    res.json(result.rows); // Return project details
+   }
+   catch(error){
+    console.error("not working",error);
+   }
+  
+})
 
 app.get('/',(req,res)=>{
     res.send("Hello World");
