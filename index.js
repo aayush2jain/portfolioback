@@ -55,7 +55,8 @@ from users as u
 left join visitors as v
 on u.id = v.userId
 where u.email=$1
-group by u.id;`
+group by u.id
+order by visitors desc;`
   try{
       const {rows} = await db.query(query,[email])
       res.json({ success: true, message: "user found", userDetails: rows });
