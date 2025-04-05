@@ -50,10 +50,15 @@ db.query("SELECT NOW()", (err, res) => {
 app.get('/getuser',async (req, res) =>{
   console.log("getuser called",req.query.email);
   const email = req.query.email;
-  const query = `select * from users where email =$1`
+  const query = `select u.*,count(v.userId) as visitors
+from users as u
+left join visitors as v
+on u.id = v.userId
+where u.id=$1
+group by u.id`;
   try{
       const {rows} = await db.query(query,[email])
-      res.json({ success: true, message: "Project updated successfully!", userDetails: rows });
+      res.json({ success: true, message: "user found", userDetails: rows });
   }
   catch(error){
     console.error("error",error);
@@ -395,9 +400,7 @@ app.get("/skillset/:id", async (req, res) => {
    catch(error){
     console.error("not working",error);
    }
-  
 })
-
 app.get('/',(req,res)=>{
     res.send("Hello World");
 })
