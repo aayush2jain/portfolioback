@@ -54,8 +54,8 @@ app.get('/getuser',async (req, res) =>{
 from users as u
 left join visitors as v
 on u.id = v.userId
-where u.id=$1
-group by u.id`;
+where u.email=$1
+group by u.id;`
   try{
       const {rows} = await db.query(query,[email])
       res.json({ success: true, message: "user found", userDetails: rows });
