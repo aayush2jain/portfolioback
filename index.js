@@ -315,7 +315,7 @@ app.get('/user2experience/:id',async (req,res)=>{
       res.status(500).json({ error: "user2experience  query failed" });
   }
 })
-app.get('user2project/:id',async (req,res)=>{
+app.get('/user2project/:id',async (req,res)=>{
   const userId = req.params.id;
   console.log("userId",userId);
   const query = `select * from projects
