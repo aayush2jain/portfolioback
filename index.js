@@ -299,18 +299,18 @@ left JOIN experience ON experience.user_id = users.id
 left JOIN projects ON projects.userid = users.id
 left JOIN user_introduction ON user_introduction.user_id = users.id
 where users.id = $1`;
-})
 try{
-   const result = await db.query(query,[userId]);
-   if (result.rows.length === 0) {
-    return res.status(404).json({ message: "User not found" });
+  const result = await db.query(query,[userId]);
+  if (result.rows.length === 0) {
+   return res.status(404).json({ message: "User not found" });
 }
 res.json(result.rows[0]); 
-
 }
 catch(error){
-  console.error("error",error);
+ console.error("error",error);
 }
+})
+
   
 app.post("/visit", async (req, res) => {
   const { id } = req.body;
