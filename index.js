@@ -24,13 +24,7 @@ const transporter = nodemailer.createTransport({
     pass: 'jpdzvxmwrnfcymfx',
   },
 });
-// // MySQL Database Connection
-// const db = mysql.createConnection({
-//     user:'root',
-//     host:'localhost',
-//     password:'0000',
-//     database:'portfolio'
-// });
+
 db.connect((err) => {
     if (err) {
         console.error("Database connection failed: " + err.stack);
@@ -291,12 +285,10 @@ app.get("/user/:id", async (req, res) => {
 app.get('/user2/:id',async (req,res)=>{
   const userId = req.params.id;
   console.log("userId",userId);
-  const query = `SELECT users.*, aboutuser.*, education.*, experience.*, projects.*, user_introduction.*
+  const query = `SELECT users.*, aboutuser.*, education.*, user_introduction.*
 FROM users
 left JOIN aboutuser ON aboutuser.user_id = users.id
 left JOIN education ON education.user_id = users.id
-left JOIN experience ON experience.user_id = users.id
-left JOIN projects ON projects.userid = users.id
 left JOIN user_introduction ON user_introduction.user_id = users.id
 where users.id = $1`;
 try{
@@ -304,11 +296,37 @@ try{
   if (result.rows.length === 0) {
    return res.status(404).json({ message: "User not found" });
 }
-res.json(result.rows[0]); 
+res.json(result.rows); 
 }
 catch(error){
  console.error("error",error);
 }
+})
+ 
+app.get('/user2experience/:id',async (req,res)=>{
+  const userId = req.params.id;
+  const query = `SELECT * FROM experience where user_id = $1`;
+  try{
+      const result = await db.query(query,[userId]);
+      res.json(result.rows);
+  }
+  catch(error){
+      console.error("error",error);
+      res.status(500).json({ error: "user2experience  query failed" });
+  }
+})
+app.get('user2project/:id',async (req,res)=>{
+  const userId = req.params.id;
+  console.log("userId",userId);
+  const query = `select * from projects
+where userid = $1`;
+  try{
+      const result = await db.query(query,[userId]);
+      res.json(result.rows);
+  }
+  catch(error){
+      console.error("error",error);
+  }
 })
 
   
