@@ -9,10 +9,10 @@ const {Pool} = require("pg");
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors()); // Enable CORS for frontend access 
-// 🔹 PostgreSQL Database Connection
+// PostgreSQL Database Connection
 const db = new Pool({
   connectionString:'postgresql://postgres:jmbfLnrZzaHrrMIknbtzTJbjWatRqPKk@gondola.proxy.rlwy.net:21402/railway',
-  ssl: { rejectUnauthorized: false },  // Required for Railway PostgreSQL
+  ssl: { rejectUnauthorized: false },  
 });
 // Create a Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -41,9 +41,9 @@ db.connect((err) => {
 // Test the database connection
 db.query("SELECT NOW()", (err, res) => {
   if (err) {
-      console.error("❌ Database connection failed:", err);
+      console.error(" Database connection failed:", err);
   } else {
-      console.log("✅ Connected to PostgreSQL at:", res.rows[0].now);
+      console.log("Connected to PostgreSQL at:", res.rows[0].now);
   }
 });
 
@@ -288,9 +288,30 @@ app.get("/user/:id", async (req, res) => {
   }
 });
 
+app.get('/user2/:id',async (req,res)=>{
+  const userId = req.params.id;
+  console.log("userId",userId);
+  const query = `SELECT users.*, aboutuser.*, education.*, experience.*, projects.*, user_introduction.*
+FROM users
+left JOIN aboutuser ON aboutuser.user_id = users.id
+left JOIN education ON education.user_id = users.id
+left JOIN experience ON experience.user_id = users.id
+left JOIN projects ON projects.userid = users.id
+left JOIN user_introduction ON user_introduction.user_id = users.id
+where users.id = $1`;
+})
+try{
+   const result = await db.query(query,[userId]);
+   if (result.rows.length === 0) {
+    return res.status(404).json({ message: "User not found" });
+}
+res.json(result.rows[0]); 
 
-// routes/logVisit.js or directly in your main file
-
+}
+catch(error){
+  console.error("error",error);
+}
+  
 app.post("/visit", async (req, res) => {
   const { id } = req.body;
   
