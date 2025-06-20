@@ -8,22 +8,24 @@ const bodyParser = require('body-parser');
 const {Pool} = require("pg"); 
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(cors()); // Enable CORS for frontend access 
+app.use(cors(
+  ['http://localhost:3000', 'https://create-portfolio.tech','https://myportfolio-phi-snowy-32.vercel.app']
+)); // Enable CORS for frontend access 
 // PostgreSQL Database Connection
 const db = new Pool({
   connectionString:'postgresql://postgres:jmbfLnrZzaHrrMIknbtzTJbjWatRqPKk@gondola.proxy.rlwy.net:21402/railway',
   ssl: { rejectUnauthorized: false },  
 });
 // Create a Nodemailer transporter
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587, // Use 587 instead of 465
-  secure: false, // `true` for port 465, `false` for 587
-  auth: {
-    user: 'aayushjain1290@gmail.com',
-    pass: 'jpdzvxmwrnfcymfx',
-  },
-});
+// const transporter = nodemailer.createTransport({
+//   host: "smtp.gmail.com",
+//   port: 587, // Use 587 instead of 465
+//   secure: false, // `true` for port 465, `false` for 587
+//   auth: {
+//     user: 'aayushjain1290@gmail.com',
+//     pass: 'jpdzvxmwrnfcymfx',
+//   },
+// });
 
 db.connect((err) => {
     if (err) {
