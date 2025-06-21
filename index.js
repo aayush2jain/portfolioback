@@ -16,10 +16,18 @@ app.use(
   })
 );
 // PostgreSQL Database Connection
+// const db = new Pool({
+//   connectionString:'postgresql://postgres:jmbfLnrZzaHrrMIknbtzTJbjWatRqPKk@gondola.proxy.rlwy.net:21402/railway',
+//   ssl: { rejectUnauthorized: false },  
+// });
 const db = new Pool({
   connectionString:'postgresql://postgres:jmbfLnrZzaHrrMIknbtzTJbjWatRqPKk@gondola.proxy.rlwy.net:21402/railway',
-  ssl: { rejectUnauthorized: false },  
+  ssl: { rejectUnauthorized: false },
+  idleTimeoutMillis: 3000,           // disconnect idle connections early
+  connectionTimeoutMillis: 5000,     // give up if connection takes >5s
+  max: 1                             // limit number of connections
 });
+
 // Create a Nodemailer transporter
 // const transporter = nodemailer.createTransport({
 //   host: "smtp.gmail.com",
