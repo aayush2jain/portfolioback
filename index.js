@@ -11,7 +11,10 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(
   cors({
-    origin: ['http://localhost:3000','https://portfoliotemp1.vercel.app','https://create-portfolio.tech', 'https://myportfolio-phi-snowy-32.vercel.app'],
+    origin: ['http://localhost:3000','https://portfoliotemp1.vercel.app',
+      'https://editportfolio.vercel.app',
+      'https://portfolio-query.vercel.app',
+      'https://create-portfolio.tech', 'https://myportfolio-phi-snowy-32.vercel.app'],
     credentials: true,
   })
 );
