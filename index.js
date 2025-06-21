@@ -41,7 +41,7 @@ db.connect((err) => {
     }
     console.log("Connected to MySQL");
 });
-module.exports = serverless(app);
+// module.exports = serverless(app);
 // Test the database connection
 db.query("SELECT NOW()", (err, res) => {
   if (err) {
