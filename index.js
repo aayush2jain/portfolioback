@@ -31,9 +31,9 @@ const db = new Pool({
 //   },
 // });
 
-db.connect()
-  .then(() => console.log("Connected to PostgreSQL"))
-  .catch((err) => console.error("Connection error", err.stack));
+// db.connect()
+//   .then(() => console.log("Connected to PostgreSQL"))
+//   .catch((err) => console.error("Connection error", err.stack));
 
 module.exports = serverless(app);
 // Test the database connection
