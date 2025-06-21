@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:3000","https://portfoliotemp1.vercel.app","https://create-portfolio.tech", 'https://myportfolio-phi-snowy-32.vercel.app'],
+    origin: ['http://localhost:3000','https://portfoliotemp1.vercel.app','https://create-portfolio.tech', 'https://myportfolio-phi-snowy-32.vercel.app'],
     credentials: true,
   })
 );
@@ -38,6 +38,7 @@ db.connect((err) => {
     }
     console.log("Connected to MySQL");
 });
+export const handler = serverless(app);
 // Test the database connection
 db.query("SELECT NOW()", (err, res) => {
   if (err) {
@@ -455,4 +456,4 @@ app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-export const handler = serverless(app);
+
