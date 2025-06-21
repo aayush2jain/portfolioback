@@ -8,9 +8,12 @@ const bodyParser = require('body-parser');
 const {Pool} = require("pg"); 
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(cors(
-  ['http://localhost:3000', 'https://create-portfolio.tech','https://myportfolio-phi-snowy-32.vercel.app']
-)); // Enable CORS for frontend access 
+app.use(
+  cors({
+    origin: ['http://localhost:3000', 'https://create-portfolio.tech', 'https://myportfolio-phi-snowy-32.vercel.app'],
+    credentials: true,
+  })
+);
 // PostgreSQL Database Connection
 const db = new Pool({
   connectionString:'postgresql://postgres:jmbfLnrZzaHrrMIknbtzTJbjWatRqPKk@gondola.proxy.rlwy.net:21402/railway',
