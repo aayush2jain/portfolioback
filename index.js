@@ -34,7 +34,13 @@ const db = new Pool({
 // db.connect()
 //   .then(() => console.log("Connected to PostgreSQL"))
 //   .catch((err) => console.error("Connection error", err.stack));
-
+db.connect((err) => {
+    if (err) {
+        console.error("Database connection failed: " + err.stack);
+        return;
+    }
+    console.log("Connected to MySQL");
+});
 module.exports = serverless(app);
 // Test the database connection
 db.query("SELECT NOW()", (err, res) => {
