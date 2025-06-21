@@ -5,6 +5,7 @@ const nodemailer = require("nodemailer");
 const app = express();
 const PORT =  4000;
 const bodyParser = require('body-parser');
+const serverless = require('serverless-http');
 const {Pool} = require("pg"); 
 app.use(bodyParser.json());
 app.use(express.json());
@@ -453,3 +454,5 @@ app.get('/',(req,res)=>{
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+export const handler = serverless(app);
