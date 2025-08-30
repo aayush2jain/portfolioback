@@ -63,13 +63,13 @@ db.query("SELECT NOW()", (err, res) => {
 app.get('/getuser',async (req, res) =>{
   console.log("getuser called",req.query.email);
   const email = req.query.email;
-  const query = `select u.*,count(v.userId) as visitors
-from users as u
-left join visitors as v
-on u.id = v.userId
-where u.email=$1
-group by u.id
-order by visitors desc;`
+  const query = `SELECT u.id,u.name, COUNT(v.id) AS visitor_count
+FROM users AS u
+LEFT JOIN visitors AS v
+  ON u.id = v.userId
+WHERE u.email = $1
+GROUP BY u.id
+ORDER BY visitor_count DESC;`
   try{
       const {rows} = await db.query(query,[email])
       res.json({ success: true, message: "user found", userDetails: rows });
