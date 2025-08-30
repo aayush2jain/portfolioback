@@ -84,7 +84,7 @@ ORDER BY visitor_count DESC;
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    res.json({ success: true, message: "User found", userDetails: rows[0] });
+    res.json({ success: true, message: "User found", userDetails: rows });
   } catch (error) {
     console.error("error", error);
     res.status(500).json({ success: false, message: "Database query failed", error: error.message });
