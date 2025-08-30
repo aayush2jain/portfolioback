@@ -66,7 +66,7 @@ app.get('/getuser', async (req, res) => {
 
   const query = `
     SELECT 
-  u.id,
+  u.id,v.*,
   COUNT(v.userid) AS visitor_count
 FROM users AS u
 LEFT JOIN visitors AS v
