@@ -60,24 +60,36 @@ db.query("SELECT NOW()", (err, res) => {
   }
 });
 
-app.get('/getuser',async (req, res) =>{
-  console.log("getuser called",req.query.email);
+app.get('/getuser', async (req, res) => {
+  console.log("getuser called", req.query.email);
   const email = req.query.email;
-  const query = `SELECT u.id,u.name, COUNT(v.id) AS visitor_count
-FROM users AS u
-LEFT JOIN visitors AS v
-  ON u.id = v.userId
-WHERE u.email = $1
-GROUP BY u.id
-ORDER BY visitor_count DESC;`
-  try{
-      const {rows} = await db.query(query,[email])
-      res.json({ success: true, message: "user found", userDetails: rows });
+
+  const query = `
+    SELECT 
+      u.id,
+      COUNT(v.id) AS visitor_count
+    FROM users AS u
+    LEFT JOIN visitors AS v
+      ON u.id = v.userId
+    WHERE u.email = $1
+    GROUP BY u.id
+    ORDER BY visitor_count DESC;
+  `;
+
+  try {
+    const { rows } = await db.query(query, [email]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.json({ success: true, message: "User found", userDetails: rows[0] });
+  } catch (error) {
+    console.error("error", error);
+    res.status(500).json({ success: false, message: "Database query failed", error: error.message });
   }
-  catch(error){
-    console.error("error",error);
-  }
-})
+});
+
 app.post('/user/submit', async (req, res) => {
   const { name, email, phone, linkedin, github, twitter, instagram, pinterest, resume } = req.body;
   const { profession, about, tech_stack,skills, hobbies,roles } = req.body;
