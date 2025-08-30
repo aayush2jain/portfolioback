@@ -66,14 +66,15 @@ app.get('/getuser', async (req, res) => {
 
   const query = `
     SELECT 
-      u.id,
-      COUNT(v.id) AS visitor_count
-    FROM users AS u
-    LEFT JOIN visitors AS v
-      ON u.id = v.userId
-    WHERE u.email = $1
-    GROUP BY u.id
-    ORDER BY visitor_count DESC;
+  u.id,
+  COUNT(v.userid) AS visitor_count
+FROM users AS u
+LEFT JOIN visitors AS v
+  ON u.id = v.userId
+WHERE u.email = $1
+GROUP BY u.id
+ORDER BY visitor_count DESC;
+
   `;
 
   try {
