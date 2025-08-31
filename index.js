@@ -91,6 +91,7 @@ ORDER BY visitor_count DESC;
 
 app.get('/getvisitor', async (req, res) => {
   const id = req.query.id;
+  console.log("getvisitor called", id);
   const query = `
    SELECT * from visitors WHERE id = $1;
   `;
