@@ -93,7 +93,7 @@ app.get('/getvisitor', async (req, res) => {
   const id = req.query.id;
   console.log("getvisitor called", id);
   const query = `
-   SELECT * from visitors WHERE id = $1;
+   SELECT * from visitors WHERE userId = $1;
   `;
   try {
     const { rows } = await db.query(query, [id]);
