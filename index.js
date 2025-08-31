@@ -59,25 +59,13 @@ db.query("SELECT NOW()", (err, res) => {
       console.log("Connected to PostgreSQL at:", res.rows[0].now);
   }
 });
-
-app.get('/getuser', async (req, res) => {
-  console.log("getuser called", req.query.email);
-  const email = req.query.email;
-
+app.get('/getvisitor', async (req, res) => {
+  const id = req.query.id;
   const query = `
-   SELECT 
-  u.id,
-  COUNT(v.userId) AS visitor_count
-FROM users AS u
-LEFT JOIN visitors AS v
-  ON u.id = v.userId
-WHERE u.email = $1
-GROUP BY u.id
-ORDER BY visitor_count DESC;
+   SELECT * from visitors WHERE id = $1;
   `;
-
   try {
-    const { rows } = await db.query(query, [email]);
+    const { rows } = await db.query(query, [id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: "User not found" });
